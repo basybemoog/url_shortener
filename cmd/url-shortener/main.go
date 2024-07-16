@@ -30,6 +30,8 @@ func main() {
 	}
 
 	_ = storage
+
+	storage.SaveURL("https://github.com/", "github")
 	//TODO: init storage: sqlite3
 
 	//TODO: init router: chi, render
