@@ -3,6 +3,6 @@ package storage
 import "errors"
 
 var (
-	errURLNotFound = errors.New("url not found")
-	errURLExists   = errors.New("url exists")
+	ErrURLNotFound = errors.New("url not found")
+	ErrURLExists   = errors.New("url exists")
 )

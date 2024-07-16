@@ -2,8 +2,10 @@ package sqlite
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/mattn/go-sqlite3"
+	"urlshortner/internal/storage"
 )
 
 type Storage struct {
@@ -55,4 +57,23 @@ func (s *Storage) SaveURL(urlToSave, alias string) (int64, error) {
 		return 0, fmt.Errorf("%s: failed to get last insert id %w", op, err)
 	}
 	return id, nil
+}
+
+func (s *Storage) GetURL(alias string) (string, error) {
+	const op = "storage.SQLite.GetURL"
+
+	stmt, err := s.db.Prepare("SELECT url FROM url WHERE alias = ?")
+	if err != nil {
+		return "", fmt.Errorf("%s: %w", op, err)
+	}
+
+	var resURL string
+	err = stmt.QueryRow(alias).Scan(&resURL)
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", storage.ErrURLNotFound
+	}
+	if err != nil {
+		return "", fmt.Errorf("%s: %w", op, err)
+	}
+	return resURL, nil
 }
