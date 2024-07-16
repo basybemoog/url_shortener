@@ -39,7 +39,7 @@ func New(storagePath string) (*Storage, error) {
 func (s *Storage) SaveURL(urlToSave, alias string) (int64, error) {
 	const op = "storage.SQLite.SaveURL"
 
-	stmt, err := s.db.Prepare("INSERT INTO url(alias, url) VALUES(?, ?)")
+	stmt, err := s.db.Prepare("INSERT INTO url(url, alias) VALUES(?, ?)")
 	if err != nil {
 		return 0, fmt.Errorf("%s: %w", op, err)
 	}
@@ -76,4 +76,17 @@ func (s *Storage) GetURL(alias string) (string, error) {
 		return "", fmt.Errorf("%s: %w", op, err)
 	}
 	return resURL, nil
+}
+
+func (s *Storage) DeleteURL(alias string) error {
+	const op = "storage.SQLite.DeleteURL"
+	stmt, err := s.db.Prepare("DELETE FROM url WHERE alias = ?")
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+	_, err = stmt.Exec(alias)
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+	return nil
 }

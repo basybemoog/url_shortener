@@ -2,9 +2,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"log/slog"
 	"os"
 	config2 "urlshortner/internal/config"
+	"urlshortner/internal/lib/logger/sl"
+	"urlshortner/internal/storage/sqlite"
 )
 
 const (
@@ -21,7 +25,18 @@ func main() {
 	log.Info("starting url-shortener", slog.String("env", config.Env))
 	log.Debug("debug messages enabled")
 
-	//TODO: init router: chi, render
+	storage, err := sqlite.New(config.StoragePath)
+	if err != nil {
+		log.Error("failed to initialize storage", sl.Err(err))
+		return
+	}
+	_ = storage
+
+	router := chi.NewRouter()
+
+	router.Use(middleware.RequestID)
+	router.Use(middleware.RealIP)
+	router.Use(middleware.Logger)
 
 	//TODO: run server
 }
