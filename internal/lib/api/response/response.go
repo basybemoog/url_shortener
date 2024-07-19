@@ -16,10 +16,9 @@ const (
 	StatusError = "error"
 )
 
-func OK(msg string) Response {
+func OK() Response {
 	return Response{
 		Status: StatusOK,
-		Error:  msg,
 	}
 }
 
@@ -47,4 +46,5 @@ func ValidationError(errs validator.ValidationErrors) Response {
 		Status: StatusError,
 		Error:  strings.Join(errMessages, ", "),
 	}
+
 }

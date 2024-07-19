@@ -5,8 +5,10 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"log/slog"
+	"net/http"
 	"os"
 	config2 "urlshortner/internal/config"
+	"urlshortner/internal/lib/http-server/handlers/url/save"
 	mwLogger "urlshortner/internal/lib/http-server/middleware/logger"
 	"urlshortner/internal/lib/logger/handlers/slogpretty"
 	"urlshortner/internal/lib/logger/sl"
@@ -43,6 +45,21 @@ func main() {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
+	router.Post("/url", save.New(log, storage))
+
+	log.Info("starting server", slog.String("address", config.Address))
+
+	server := &http.Server{
+		Addr:         config.Address,
+		Handler:      router,
+		ReadTimeout:  config.HTTPServer.Timeout,
+		WriteTimeout: config.HTTPServer.Timeout,
+		IdleTimeout:  config.HTTPServer.IdleTimeout,
+	}
+
+	if err := server.ListenAndServe(); err != nil {
+		log.Error("failed to start server", sl.Err(err))
+	}
 	//TODO: run server
 }
 
