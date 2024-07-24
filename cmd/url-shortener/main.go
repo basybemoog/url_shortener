@@ -72,7 +72,6 @@ func main() {
 	if err := server.ListenAndServe(); err != nil {
 		log.Error("failed to start server", sl.Err(err))
 	}
-	//TODO: run server
 }
 
 func setupLogger(env string) *slog.Logger {
