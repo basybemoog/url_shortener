@@ -48,7 +48,7 @@ func TestSaveHandler(t *testing.T) {
 			name:      "SaveURL Error",
 			alias:     "test_alias",
 			url:       "https://google.com",
-			respError: "failed to add url",
+			respError: "failed to save url",
 			mockError: errors.New("unexpected error"),
 		},
 	}

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	config2 "urlshortner/internal/config"
+	"urlshortner/internal/http-server/handlers/redirect"
 	"urlshortner/internal/http-server/handlers/url/save"
 	mwLogger "urlshortner/internal/http-server/middleware/logger"
 	"urlshortner/internal/lib/logger/handlers/slogpretty"
@@ -26,7 +27,10 @@ func main() {
 	fmt.Println(config)
 	log := setupLogger(config.Env)
 
-	log.Info("starting url-shortener", slog.String("env", config.Env))
+	log.Info("starting url-shortener",
+		slog.String("env", config.Env),
+		slog.String("version", "0.1"),
+	)
 	log.Debug("debug messages enabled")
 
 	storage, err := sqlite.New(config.StoragePath)
@@ -45,7 +49,15 @@ func main() {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
-	router.Post("/url", save.New(log, storage))
+	router.Route("/url", func(r chi.Router) {
+		r.Use(middleware.BasicAuth("url_shortener", map[string]string{
+			config.HTTPServer.User: config.HTTPServer.Password,
+		}))
+
+		r.Post("/", save.New(log, storage))
+	})
+
+	router.Get("/{alias}", redirect.New(log, storage))
 
 	log.Info("starting server", slog.String("address", config.Address))
 
